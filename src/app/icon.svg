@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" width="64" height="64">
+  <rect x="-100" y="-100" width="200" height="200" fill="#ff2e93"/>
+  <g stroke="#100a14" stroke-width="7" stroke-linejoin="round">
+    <g fill="#ffd23f">
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z"/>
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z" transform="rotate(45)"/>
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z" transform="rotate(90)"/>
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z" transform="rotate(135)"/>
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z" transform="rotate(180)"/>
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z" transform="rotate(225)"/>
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z" transform="rotate(270)"/>
+      <path d="M -8 -50 C -10 -66, -5 -78, 0 -82 C 5 -78, 10 -66, 8 -50 Z" transform="rotate(315)"/>
+    </g>
+    <circle cx="0" cy="0" r="48" fill="#ff7a1a"/>
+    <path d="M -26 -10 A 12 12 0 0 1 -2 -10 Z" fill="#100a14" stroke="none"/>
+    <path d="M 2 -10 A 12 12 0 0 1 26 -10 Z" fill="#100a14" stroke="none"/>
+    <path d="M -18 14 Q -2 30 20 12" fill="none" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
