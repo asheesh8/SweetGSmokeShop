@@ -5,7 +5,7 @@ Step 01 is the 3D nug scan and needs no video, so this is three clips.
 | Step | File | Status |
 | --- | --- | --- |
 | 02 The Grind | `public/video/grind.mp4` | ✅ **done** — installed, 2.6MB, poster generated |
-| 03 The Pack | `public/video/ritual-loop.mp4` | ✅ **done** — trimmed to the flake-break moment, poster generated |
+| 03 The Pack | `public/video/ritual-loop.mp4` | ✅ **done** — v4-style take, funnel bowl + falling flakes, 960×720 / 2.7MB |
 | 04 The Light | `public/video/light.mp4` | ⬜ POV lap shot, 10s, **with sound** |
 
 ---
