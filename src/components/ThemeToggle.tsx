@@ -25,7 +25,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       aria-label={mounted ? `Switch to ${isDark ? 'hippie' : 'nocturne'} theme` : 'Switch theme'}
       title={mounted ? (isDark ? 'Hippie mode' : 'Nocturne mode') : undefined}
-      className={`grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] border border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary ${className}`}
+      className={`grid h-9 w-9 shrink-0 place-items-center rounded-[var(--radius-sm)] border transition-colors hover:border-primary hover:text-primary ${className || 'border-border text-muted-foreground'}`}
     >
       {!mounted ? (
         <span className="block h-4 w-4" />

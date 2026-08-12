@@ -13,12 +13,15 @@ import Image from 'next/image'
  */
 export function Wordmark({
   className,
-  size = 34,
+  size = 30,
   showText = true,
+  dim,
 }: {
   className?: string
   size?: number
   showText?: boolean
+  /** Override for the subline when the lockup sits over photography. */
+  dim?: string
 }) {
   return (
     <span className={`inline-flex items-center gap-2.5 ${className ?? ''}`}>
@@ -33,8 +36,13 @@ export function Wordmark({
       />
       {showText && (
         <span className="flex flex-col leading-none">
-          <span className="display text-[15px] tracking-[0.02em]">SWEET G&rsquo;S</span>
-          <span className="mt-[3px] font-mono text-[8px] tracking-[0.24em] text-muted-foreground">
+          <span className="display whitespace-nowrap text-[14px] tracking-[0.02em] sm:text-[15px]">
+            SWEET G&rsquo;S
+          </span>
+          <span
+            className="mt-[3px] hidden whitespace-nowrap font-mono text-[8px] tracking-[0.24em] text-muted-foreground xs:block"
+            style={dim ? { color: dim } : undefined}
+          >
             SMOKE SHOP
           </span>
         </span>

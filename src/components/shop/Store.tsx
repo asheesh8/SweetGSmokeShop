@@ -233,7 +233,7 @@ export function Store({ items, categories }: { items: Item[]; categories: Cat[] 
   )
 
   return (
-    <div className="wrap grid gap-8 py-12 lg:grid-cols-[240px_1fr] lg:gap-14 lg:py-16">
+    <div className="wrap grid gap-8 py-10 lg:grid-cols-[240px_1fr] lg:gap-14 lg:py-16">
       {/* ── Filter rail (desktop) ──────────────────────────── */}
       <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
         <div className="space-y-8">
@@ -292,7 +292,7 @@ export function Store({ items, categories }: { items: Item[]; categories: Cat[] 
               Sort
             </label>
             <Select value={sort} onValueChange={(v) => setSort(v as Sort)}>
-              <SelectTrigger id="store-sort" className="w-[168px]" size="sm">
+              <SelectTrigger id="store-sort" className="w-[150px] sm:w-[168px]" size="sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -355,7 +355,7 @@ export function Store({ items, categories }: { items: Item[]; categories: Cat[] 
             </Button>
           </div>
         ) : (
-          <ul className="grid grid-cols-2 gap-x-5 gap-y-9 pt-8 lg:grid-cols-3">
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-7 pt-6 sm:gap-x-5 sm:gap-y-9 sm:pt-8 lg:grid-cols-3">
             {results.map((p, i) => {
               const held = has(p.slug)
               const inStockFlavours = p.variants.filter((v) => v.inStock).length
@@ -391,7 +391,7 @@ export function Store({ items, categories }: { items: Item[]; categories: Cat[] 
 
                     <div className="mt-3 flex-1">
                       {p.brand && <p className="eyebrow">{p.brand}</p>}
-                      <h3 className="display mt-1 text-lg leading-tight">{p.name}</h3>
+                      <h3 className="display mt-1 text-[15px] leading-tight sm:text-lg">{p.name}</h3>
                       <p className="mt-1 font-mono text-[12px] text-primary">
                         {formatPrice(p.priceCents)}
                       </p>
@@ -401,7 +401,7 @@ export function Store({ items, categories }: { items: Item[]; categories: Cat[] 
                         </p>
                       )}
                       {p.hook && (
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.hook}</p>
+                        <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground sm:text-sm">{p.hook}</p>
                       )}
                     </div>
                   </button>

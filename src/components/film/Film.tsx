@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { useChapter } from './ChapterContext'
 import { Button } from '@/components/ui/button'
 import { SHOP, DIRECTIONS_URL } from '@/lib/shop'
 
@@ -84,7 +83,6 @@ export function Film() {
   const [active, setActive] = useState(0)
   const wrapRef = useRef<HTMLDivElement>(null)
   const layerRefs = useRef<(HTMLDivElement | null)[]>([])
-  const { setChapter } = useChapter()
 
   // Which chapter owns the viewport right now.
   useEffect(() => {
@@ -107,11 +105,6 @@ export function Film() {
     sections.forEach((s) => io.observe(s))
     return () => io.disconnect()
   }, [])
-
-  useEffect(() => {
-    setChapter({ index: active + 1, total: CHAPTERS.length, label: CHAPTERS[active].label })
-    return () => setChapter(null)
-  }, [active, setChapter])
 
   // Slow parallax drift on the live frame. Driven straight from scrollY in a
   // rAF — putting scroll position into React state would re-render the whole
@@ -162,6 +155,23 @@ export function Film() {
         <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_50%,transparent_35%,rgba(8,7,6,0.7)_100%)]" />
       </div>
 
+      {/* Chapter marker. Lives here rather than in the nav — navigation
+          links matter more than a cinematic readout, and on a phone there is
+          no room for both. */}
+      <div className="pointer-events-none fixed bottom-5 left-0 right-0 z-20 md:bottom-7">
+        <div className="wrap flex items-center gap-3">
+          <span className="font-mono text-[9px] uppercase tracking-[0.22em] text-[#f4efe4]/60 md:text-[10px]">
+            Ch {String(active + 1).padStart(2, '0')} &mdash; {CHAPTERS[active].label}
+          </span>
+          <span className="h-px flex-1 max-w-24 bg-[#f4efe4]/20" aria-hidden="true">
+            <span
+              className="block h-px bg-[#f4efe4]/70 transition-[width] duration-500"
+              style={{ width: `${((active + 1) / CHAPTERS.length) * 100}%` }}
+            />
+          </span>
+        </div>
+      </div>
+
       {/* ── Chapters ───────────────────────────────────────── */}
       <div className="relative z-10">
         {CHAPTERS.map((c, i) => (
@@ -170,21 +180,21 @@ export function Film() {
             data-chapter={i}
             id={`ch-${c.id}`}
             aria-label={`Chapter ${i + 1} — ${c.label}`}
-            className={`flex min-h-[100svh] flex-col px-6 md:px-14 ${
+            className={`flex min-h-[100svh] flex-col justify-center px-5 md:px-14 ${
               c.side === 'center'
-                ? 'items-center justify-center text-center'
+                ? 'items-start text-left md:items-center md:text-center'
                 : c.side === 'right'
-                  ? 'items-end justify-center text-right'
-                  : 'items-start justify-center text-left'
+                  ? 'items-start text-left md:items-end md:text-right'
+                  : 'items-start text-left'
             }`}
           >
             {c.kind === 'title' && (
               <div className="w-full max-w-6xl">
-                <h1 className="display text-[clamp(3.5rem,17vw,15rem)] leading-[0.82] text-[#f4efe4] drop-shadow-[0_4px_40px_rgba(0,0,0,0.6)]">
+                <h1 className="display text-[clamp(3rem,15vw,15rem)] leading-[0.84] text-[#f4efe4] drop-shadow-[0_4px_40px_rgba(0,0,0,0.6)]">
                   Sweet G&rsquo;s
                 </h1>
                 <p className="mt-6 max-w-md text-lg text-[#f4efe4]/80 md:text-xl">{c.sub}</p>
-                <div className="mt-10 flex flex-wrap items-center gap-3">
+                <div className="mt-9 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
                   <Button asChild size="lg">
                     <Link href="/shop">Browse the shop</Link>
                   </Button>
@@ -203,7 +213,7 @@ export function Film() {
             )}
 
             {c.kind === 'statement' && (
-              <h2 className="display max-w-4xl text-[clamp(2.4rem,7.5vw,6rem)] leading-[0.92] text-[#f4efe4] drop-shadow-[0_4px_40px_rgba(0,0,0,0.65)]">
+              <h2 className="display max-w-4xl text-[clamp(2.1rem,8vw,6rem)] leading-[0.94] text-[#f4efe4] drop-shadow-[0_4px_40px_rgba(0,0,0,0.65)]">
                 {c.line1}
                 <br />
                 {c.line2}
@@ -211,10 +221,10 @@ export function Film() {
             )}
 
             {c.kind === 'card' && (
-              <div className="w-full max-w-lg rounded-[var(--radius-lg)] border border-[#f4efe4]/15 bg-[rgba(18,15,12,0.72)] p-9 backdrop-blur-md md:p-11">
+              <div className="w-full max-w-lg rounded-[var(--radius-lg)] border border-[#f4efe4]/15 bg-[rgba(18,15,12,0.78)] p-7 backdrop-blur-md md:p-11">
                 <h2 className="display text-[clamp(2rem,5vw,3.2rem)] text-[#f4efe4]">{c.line1}</h2>
                 <p className="mt-4 text-[15px] leading-relaxed text-[#f4efe4]/70">{c.sub}</p>
-                <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
                   <Button asChild size="lg">
                     <Link href="/shop">Find your gear</Link>
                   </Button>
@@ -231,7 +241,7 @@ export function Film() {
             )}
 
             {i === 0 && (
-              <p className="absolute bottom-10 left-1/2 -translate-x-1/2 font-mono text-[10px] uppercase tracking-[0.4em] text-[#f4efe4]/50">
+              <p className="absolute bottom-16 right-5 font-mono text-[9px] uppercase tracking-[0.4em] text-[#f4efe4]/45 md:bottom-7 md:right-14">
                 Scroll
               </p>
             )}

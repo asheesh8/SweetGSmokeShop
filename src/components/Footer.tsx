@@ -5,7 +5,7 @@ import { Wordmark } from '@/components/Wordmark'
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="wrap grid gap-12 py-16 md:grid-cols-[1.5fr_1fr_1fr] md:py-20">
+      <div className="wrap grid gap-10 py-14 sm:grid-cols-2 md:grid-cols-[1.5fr_1fr_1fr] md:py-20">
         <div>
           <Wordmark />
           <p className="mt-6 max-w-xs text-sm leading-relaxed text-muted-foreground">

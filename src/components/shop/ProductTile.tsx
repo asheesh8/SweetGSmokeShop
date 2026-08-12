@@ -47,9 +47,9 @@ export function ProductTile({
       </div>
       <div className="mt-3">
         {p.brand && <p className="eyebrow">{p.brand}</p>}
-        <h3 className="display mt-1 text-lg leading-tight">{p.name}</h3>
+        <h3 className="display mt-1 text-[15px] leading-tight sm:text-lg">{p.name}</h3>
         <p className="mt-1 font-mono text-[12px] text-primary">{formatPrice(p.priceCents)}</p>
-        {p.hook && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.hook}</p>}
+        {p.hook && <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground sm:text-sm">{p.hook}</p>}
       </div>
     </Link>
   )

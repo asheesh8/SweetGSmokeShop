@@ -75,11 +75,11 @@ export function RitualDemo() {
 
   return (
     <section id="ritual" className="relative border-t border-border bg-card py-20 md:py-28">
-      <div className="wrap grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      <div className="wrap grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         {/* ── Copy ─────────────────────────────────────────── */}
-        <div className="lg:pt-6">
+        <div className="order-2 lg:order-1 lg:pt-6">
           <p className="eyebrow eyebrow-rule">The Ritual</p>
-          <h2 className="display mt-6 text-[clamp(2.1rem,4.6vw,3.4rem)] text-foreground">
+          <h2 className="display mt-5 text-[clamp(1.9rem,7vw,3.4rem)] text-foreground">
             Four steps.
             <br />
             We stock all of them.
@@ -118,7 +118,7 @@ export function RitualDemo() {
         </div>
 
         {/* ── Stage ────────────────────────────────────────── */}
-        <div className="relative">
+        <div className="relative order-1 lg:order-2">
           <div className="relative aspect-4/3 overflow-hidden border border-border plate">
             {step.kind === '3d' ? (
               <>
