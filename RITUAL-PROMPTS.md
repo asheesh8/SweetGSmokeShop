@@ -6,7 +6,7 @@ Step 01 is the 3D nug scan and needs no video, so this is three clips.
 | --- | --- | --- |
 | 02 The Grind | `public/video/grind.mp4` | ✅ **done** — installed, 2.6MB, poster generated |
 | 03 The Pack | `public/video/ritual-loop.mp4` | ✅ **done** — trimmed to the flake-break moment, poster generated |
-| 04 The Light | `public/video/light.mp4` | ⬜ |
+| 04 The Light | `public/video/light.mp4` | ⬜ POV lap shot, 10s, **with sound** |
 
 ---
 
@@ -132,16 +132,68 @@ movement, not re-describing the scene.
 
 ---
 
-## 04 — The Light
+## 04 — The Light (POV, 10s, with sound)
 
-Unchanged, and still the one worth your retries.
+**This is the one clip that keeps its audio.** Everything else on the site is
+silent wallpaper; a bong pull is the one moment where sound is the point. So
+this shot alone is generated with `--generate-audio true`, and I've added an
+unmute button to the ritual player for it — see the note below.
+
+**Two deliberate departures from the other clips:**
+
+- **It's a wider POV, not a macro.** Looking down at your own lap. That breaks
+  the "one camera everywhere" rule on purpose — it's the payoff shot, and the
+  change in framing is what makes it feel like the moment arrives. The grade
+  stays identical so it still belongs to the same roll.
+- **It plays at 1×, not 0.85×.** The other clips are slowed for texture. A pull
+  slowed down sounds and looks wrong, so the player runs this one at real speed.
+
+**Cost: 90 credits** at 10s/1080p (45 at 720p). You have 935.
 
 ```bash
 higgsfield generate create seedance_2_0 \
-  --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
-  --generate-audio false --wait \
-  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A flame meets dried herb packed in the small cone-shaped chamber of a glass water pipe. It catches and glows deep orange, embers pulsing and brightening. Thick white smoke begins to rise and curl slowly through the frame, backlit so it glows against a near-black background. The ember is the main light source, warm firelight from below, pale silver rim light behind the smoke. Any water visible in the glass is clear and colourless, no blue tint. Slow, heavy, hypnotic smoke movement. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. No text, no watermark, no logos, no face."
+  --aspect-ratio 4:3 --duration 10 --resolution 1080p --mode std \
+  --generate-audio true --wait \
+  --prompt "First-person point of view, looking down at my own lap while sitting on a couch. A clear glass beaker-base water pipe rests upright between my knees on dark blue jeans, held steady by one hand around its neck. The water inside is clear and colourless. The other hand brings a lighter to the small glass bowl on the side of the pipe. The flame touches the ground herb and it catches, glowing deep orange, embers pulsing. Thick white smoke immediately begins to fill the glass chamber, swirling and churning, building until the whole beaker is opaque white. Then the smoke is pulled downward and disappears as it is inhaled, the glass clearing from top to bottom, leaving only a faint wisp. The ember is the brightest thing in frame, warm firelight from below, pale silver rim light behind the smoke, dim warm room light, near-black background. Camera is the smoker's own eyes, slight natural head movement, no face visible, no mirror, chest and lap only. Audio: a deep steady bubbling gurgle of air pulling through water, growing stronger, then a long slow inhale, then silence. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock colour grade, warm overall. No blue tint, no coloured water. No text, no watermark, no logos, no face."
 ```
+
+### The words doing the work
+
+| Intent | Phrasing |
+| --- | --- |
+| On the lap, POV | *first-person point of view, looking down at my own lap while sitting on a couch · rests upright between my knees on dark blue jeans · camera is the smoker's own eyes · chest and lap only* |
+| Smoke fills, then goes in | *fill the glass chamber, swirling and churning, building until the whole beaker is opaque white · then the smoke is pulled downward and disappears as it is inhaled, the glass clearing from top to bottom* |
+| The sound | *Audio: a deep steady bubbling gurgle of air pulling through water, growing stronger, then a long slow inhale, then silence* |
+| No face, no mirror | *no face visible, no mirror* — POV prompts often produce a reflection or swing round to a face |
+
+**On the audio:** Seedance takes its cue from the word `Audio:` in the prompt.
+Keep the description to the two or three sounds that matter — listing more
+tends to produce a muddy generic ambience instead of a clean gurgle.
+
+**If the POV fights you** and it keeps rendering a third-person shot of a person
+on a couch, drop `first-person point of view` and lead with the body copy
+instead: *"Camera mounted at eye level looking straight down at a lap. Knees and
+dark jeans fill the bottom of frame."* Describing what's in the frame beats
+naming the camera style.
+
+---
+
+## Sound on the site
+
+The video autoplays **muted** — every browser requires that, and it's not
+negotiable. So a soundtrack is only worth generating if there's a way to turn
+it on, and there now is: step 04 shows a **"Hear it"** button in the corner of
+the stage. Clicking it is the user gesture that unmutes.
+
+Three details in how that's built, in case you touch it later:
+
+- The `muted` **attribute** stays on the element permanently — that's what
+  authorises autoplay. Unmuting sets the `muted` **property** instead, after
+  playback has already started, which is always allowed.
+- Sound resets to off whenever you switch steps. Nobody wants a bong rip firing
+  at them because they clicked a different tab.
+- The button only appears on step 04. The other three clips are silent, and a
+  speaker icon on a silent video is a small lie.
 
 ---
 

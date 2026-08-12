@@ -11,7 +11,19 @@ const NugViewer = dynamic(() => import('./NugViewer').then((m) => m.NugViewer), 
 
 type Step =
   | { key: string; n: string; label: string; kind: '3d'; body: string }
-  | { key: string; n: string; label: string; kind: 'video'; src: string; poster: string; body: string }
+  | {
+      key: string
+      n: string
+      label: string
+      kind: 'video'
+      src: string
+      poster: string
+      body: string
+      /** Clip carries a real soundtrack worth offering an unmute for. */
+      sound?: boolean
+      /** Slow-motion suits the macro clips; a real-time pull does not. */
+      rate?: number
+    }
 
 const STEPS: Step[] = [
   {
@@ -47,6 +59,9 @@ const STEPS: Step[] = [
     src: '/video/light.mp4',
     poster: '/video/light.jpg',
     body: 'Slow pull, clean water, good glass. Come get set up properly on Dorset Street.',
+    sound: true,
+    // Played at real speed — the bubbling only reads right at 1×.
+    rate: 1,
   },
 ]
 
@@ -63,15 +78,20 @@ export function RitualDemo() {
   const step = STEPS[i]
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoFailed, setVideoFailed] = useState(false)
+  const [soundOn, setSoundOn] = useState(false)
 
   // Reset the failure flag when switching clips, or one missing file would
   // permanently show the fallback for every other step too.
   useEffect(() => setVideoFailed(false), [i])
 
+  // Always come back muted. Autoplay only works muted, and nobody wants a
+  // bong rip firing at them because they clicked a different step.
+  useEffect(() => setSoundOn(false), [i])
+
   useEffect(() => {
     const v = videoRef.current
     if (!v) return
-    v.playbackRate = 0.85
+    v.playbackRate = step.kind === 'video' ? (step.rate ?? 0.85) : 0.85
 
     // React sets `muted` as a property and never writes the attribute, so the
     // server-rendered HTML arrives without it — and Safari reads the attribute
@@ -84,7 +104,19 @@ export function RitualDemo() {
     // mount, so ask for playback directly. Rejection is fine and expected
     // under strict autoplay policies — the poster stays up.
     void v.play().catch(() => {})
-  }, [i])
+  }, [i, step])
+
+  /*
+   * Sound is applied as a property, separately from the muted *attribute* set
+   * above. The attribute is what lets the clip autoplay at all; unmuting after
+   * playback has started is a user gesture and is always permitted. Doing it
+   * this way means the clip never fails to start, and the audio is there for
+   * anyone who asks for it.
+   */
+  useEffect(() => {
+    const v = videoRef.current
+    if (v) v.muted = !soundOn
+  }, [soundOn, i])
 
   return (
     <section id="ritual" className="relative border-t border-border bg-card py-20 md:py-28">
@@ -165,11 +197,36 @@ export function RitualDemo() {
                 muted
                 loop
                 playsInline
+                /* Only this clip has a soundtrack; the rest are silent. */
                 autoPlay
                 preload="metadata"
                 onError={() => setVideoFailed(true)}
                 aria-label={`${step.label} — ${step.body}`}
               />
+            )}
+
+            {/* Unmute, offered only on the clip that actually has audio.
+                The video always starts muted so autoplay is permitted; this is
+                the user gesture that turns the sound on. */}
+            {step.kind === 'video' && step.sound && !videoFailed && (
+              <button
+                onClick={() => setSoundOn((v) => !v)}
+                aria-pressed={soundOn}
+                className="absolute bottom-3 right-3 flex items-center gap-2 rounded-[var(--radius-sm)] border border-[#f4efe4]/30 bg-black/50 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#f4efe4] backdrop-blur-sm transition-colors hover:border-primary hover:text-primary"
+              >
+                {soundOn ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" />
+                    <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" />
+                    <path d="M17 9.5l4 5M21 9.5l-4 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+                  </svg>
+                )}
+                {soundOn ? 'Sound on' : 'Hear it'}
+              </button>
             )}
           </div>
 
