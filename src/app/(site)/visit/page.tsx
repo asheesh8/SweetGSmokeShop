@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { SHOP, ADDRESS_ONE_LINE, DIRECTIONS_URL, yearsOpen } from '@/lib/shop'
 import { OpenBadge } from '@/components/OpenBadge'
 import { Cinematic } from '@/components/Cinematic'
+import { MapEmbed } from '@/components/MapEmbed'
 
 export const metadata: Metadata = {
   title: 'Visit — 150 Dorset St, South Burlington VT',
@@ -73,26 +74,7 @@ export default function VisitPage() {
           </div>
 
           <div className="flex flex-col gap-6">
-            {/* A static link rather than an embedded map iframe: a third-party
-                frame drags tracking cookies and a consent banner into a page
-                whose only job is "here is where we are". */}
-            <a
-              href={DIRECTIONS_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative grid aspect-4/3 place-items-center overflow-hidden border border-border plate"
-            >
-              <div className="relative text-center">
-                <p className="display text-4xl text-foreground">Dorset St</p>
-                <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                  South Burlington, VT
-                </p>
-                <span className="mt-7 inline-flex items-center gap-2 border border-border px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground transition-colors group-hover:border-primary group-hover:text-primary">
-                  Open in Maps
-                  <span className="transition-transform group-hover:translate-x-1" aria-hidden="true">&rarr;</span>
-                </span>
-              </div>
-            </a>
+            <MapEmbed />
 
             <div className="border border-border bg-card p-7">
               <h3 className="eyebrow">Not sure what you need?</h3>
