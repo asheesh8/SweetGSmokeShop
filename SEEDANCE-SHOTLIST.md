@@ -136,7 +136,12 @@ drift of the camera and a faint curl of smoke crossing frame. Cinematic, filmic
 grain, warm amber, muted earthy 1970s color grade.
 ```
 
-## 07 — Demo loop *(square, for the inline ritual player)*
+## 07 — Demo loop
+
+> ⚠️ **Superseded.** The ritual demo now has its own 4:3 stage and needs three
+> clips, not one square loop. Use **`RITUAL-PROMPTS.md`** for that section —
+> it has the correct aspect ratio, the audio flag, and exact commands. The
+> chapter backgrounds above (01–06) are still correct at 16:9.
 
 **Save as:** `public/video/ritual-loop.mp4` · **1:1** · 5s
 
