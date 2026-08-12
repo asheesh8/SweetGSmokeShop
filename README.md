@@ -36,6 +36,46 @@ Both accents come from the shop's real crest, which ships in the nav and footer.
 
 ---
 
+## `/admin` — running the shop
+
+Inventory lives in Supabase and is edited at **`/admin`**. Until Supabase is
+attached, the storefront runs on its built-in catalogue and `/admin` shows the
+three setup steps instead of a login — nothing breaks, it just isn't editable.
+
+**Setup**
+
+1. Supabase → **SQL Editor → New query** → paste all of
+   [`supabase/schema.sql`](supabase/schema.sql) and run it. Creates the tables,
+   the RLS policies and the image bucket, and seeds the six categories. Safe to
+   re-run.
+2. Copy the URL and anon key from **Project Settings → API** into `.env.local`
+   (see `.env.example`), then restart.
+3. Create your user under **Authentication → Users → Add user** (tick *Auto
+   Confirm*), then `insert into staff (email, name) values (…);`
+
+That last step matters: **having an account is not the same as being allowed to
+edit.** Writes are gated on membership in the `staff` table, both in the UI and
+in the RLS policies, so a stray signup can't touch the shop.
+
+**What it's built for**
+
+The shop's Facebook is a stream of *"FLAVOR OF THE DAY"* posts and stock that
+turns over weekly, so the admin is shaped around that rather than around a
+generic catalogue:
+
+- **The banner** is the first thing on the dashboard — type today's flavours,
+  hit post, and it's a strip across the top of the site. One tap to retire it.
+- **Flavours are first-class.** Paste a whole drop in at once (newlines or
+  commas), tap a flavour to mark it sold out — it disappears from the site but
+  stays in the list — and clear all sold-out ones in one button when restocked.
+- **One-tap in/out** and an inline price that saves on blur, straight from the
+  inventory table. No opening a form to mark something out of stock.
+- **Photos** drag-and-drop or come off a phone camera, straight to Storage.
+- **Prices can be blank.** Renders as "Ask in store", which is honest for
+  one-of-one glass rather than showing $0.
+
+Everything is live on the storefront the moment it's saved.
+
 ## Commerce: the hold list, not a cart
 
 There is **no online checkout, deliberately.** Stripe and PayPal both prohibit
@@ -61,10 +101,10 @@ customer to call. It never fakes a successful send.
 
 ## Before this goes live
 
-1. **Swap the placeholder inventory.** `src/lib/products.ts` — the categories
-   and carried brands are real (from their BBB listing); the individual items
-   are representative stand-ins. Nothing carries a price, which is both honest
-   for unconfirmed stock and right for a hold-based flow.
+1. **Connect Supabase and load real stock.** See `/admin` above.
+   `src/lib/products.ts` is only the fallback seed — the categories and carried
+   brands in it are real (from their BBB listing), the individual items are
+   representative stand-ins. Once Supabase has rows, it takes over.
 2. **Wire the email env vars** above.
 3. **Optional: add the video.** `SEEDANCE-SHOTLIST.md` has prompts, settings,
    filenames and ffmpeg encode commands. Drop clips into `public/video/` and
@@ -78,16 +118,26 @@ customer to call. It never fakes a successful send.
 
 ```
 src/
-  app/                 routes · api/reserve · sitemap · robots
+  app/
+    (site)/            storefront — age gate, nav, footer, JSON-LD
+    admin/             inventory management (auth-gated)
+    api/reserve/
+  middleware.ts        session refresh + /admin gate
   components/
     film/              chapter film + chapter context
     shop/              Store (search + facets), QuickView, tiles
     hold/              hold-list provider + slide-out
     ritual/            4-step demo, R3F nug viewer
+    admin/             login, product form, uploader, variant manager
     ui/                shadcn primitives
   lib/
     shop.ts            NAP, hours, open/closed — single source of truth
-    products.ts        catalogue (placeholder stock)
+    inventory.ts       server: Supabase read with static fallback
+    catalog.ts         client-safe shapes + price formatting
+    supabase/          browser / server clients, config
+    products.ts        fallback seed catalogue
+supabase/
+  schema.sql           tables, RLS, storage bucket, seed
 public/
   brand/ img/ products/ models/ video/
 ```
