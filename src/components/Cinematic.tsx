@@ -49,6 +49,10 @@ export function Cinematic({
 
     v.playbackRate = rate
 
+    // See RitualDemo: React never writes the `muted` attribute, only the
+    // property, and Safari checks the attribute before permitting autoplay.
+    v.setAttribute('muted', '')
+
     // Don't burn decode budget on footage that's scrolled off screen.
     const io = new IntersectionObserver(
       ([e]) => {

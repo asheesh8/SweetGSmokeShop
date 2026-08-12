@@ -70,7 +70,20 @@ export function RitualDemo() {
 
   useEffect(() => {
     const v = videoRef.current
-    if (v) v.playbackRate = 0.85
+    if (!v) return
+    v.playbackRate = 0.85
+
+    // React sets `muted` as a property and never writes the attribute, so the
+    // server-rendered HTML arrives without it — and Safari reads the attribute
+    // when deciding whether an autoplaying video is allowed to start. Setting
+    // it explicitly is the difference between this playing on an iPhone and
+    // sitting on a frozen first frame.
+    v.setAttribute('muted', '')
+
+    // Switching steps swaps the src; autoplay only fires reliably on first
+    // mount, so ask for playback directly. Rejection is fine and expected
+    // under strict autoplay policies — the poster stays up.
+    void v.play().catch(() => {})
   }, [i])
 
   return (

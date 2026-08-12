@@ -1,164 +1,142 @@
 # Ritual section — Seedance prompts
 
-The ritual demo has four steps. **Step 01 is the 3D nug scan and needs no
-video** — so this is three clips, not four.
+Step 01 is the 3D nug scan and needs no video, so this is three clips.
 
-| Step | File the site looks for | Poster |
+| Step | File | Status |
 | --- | --- | --- |
-| 02 The Grind | `public/video/grind.mp4` | `public/video/grind.jpg` |
-| 03 The Pack | `public/video/ritual-loop.mp4` | `public/video/ritual-loop.jpg` |
-| 04 The Light | `public/video/light.mp4` | `public/video/light.jpg` |
-
-Use those filenames exactly and they light up with no code change. Until then
-each step shows a "footage pending" plate, so nothing looks broken while you
-work through them.
+| 02 The Grind | `public/video/grind.mp4` | ✅ **done** — installed, 2.6MB, poster generated |
+| 03 The Pack | `public/video/ritual-loop.mp4` | ⬜ v2 prompt below |
+| 04 The Light | `public/video/light.mp4` | ⬜ |
 
 ---
 
-## Three things that will bite you
+## What went wrong with the Pack, and the fix
 
-**1. Turn the audio off.** `generate_audio` defaults to **`true`** on Seedance.
-These are muted autoplay backgrounds, and Safari blocks autoplay on a video that
-carries an audio track *even when it's muted*. Every command below passes
-`--generate-audio false`, and the ffmpeg step strips it again as insurance.
+The v1 prompt said *"a thick handblown iridescent glass bowl piece."* It
+generated **a glass ashtray.** Two reasons, both mine:
 
-**2. Shoot 4:3, not 16:9.** The ritual stage is a 4:3 box. (My earlier
-`SEEDANCE-SHOTLIST.md` said 16:9 and 1:1 for these — that was written before the
-stage existed. For the *chapter backgrounds* 16:9 is still right; for these
-three it isn't, and a 16:9 clip gets its sides cropped off in the stage.)
+1. **"Bowl piece" is shop jargon the model doesn't know.** It read "glass bowl"
+   literally — a bowl-shaped glass dish. Ashtray, cereal bowl, candle holder;
+   all reasonable readings of the words I gave it.
+2. **Nothing in the prompt asked for a person or a bong.** I wrote that the
+   bowl "rests" on the counter, so nothing moved and no hands appeared.
 
-**3. One camera, one light.** Every prompt ends with the same camera and grade
-sentence. That is the single thing making separately generated clips look like
-one shoot — don't edit it per clip.
-
----
-
-## Cost
-
-Priced against your account just now:
-
-| | 5s @ 720p | 5s @ 1080p |
-| --- | --- | --- |
-| Per clip | 22.5 credits | 45 credits |
-| **All three** | **67.5** | **135** |
-
-You have **935 credits**. Go **1080p** — the stage renders around 700px wide,
-which is ~1400px on a retina screen, and 720p at 4:3 is only 960px across, so it
-softens. Budget roughly double for retries; even then you're under 300.
+The fix is to stop naming the object and **describe its geometry instead** —
+"a short angled glass stem projecting from the side of the pipe, ending in a
+small cone-shaped chamber about the size of a thumb tip." That's a shape the
+model can actually render. The v2 prompt below also names the failure modes
+explicitly (`not an ashtray, not a glass dish`), which is worth doing whenever
+a generation has already gone wrong in a specific way.
 
 ---
 
-# The commands
-
-Run each from the project root. `--wait` blocks and prints the result URL.
-
-## 02 — The Grind
+## 03 — The Pack (v2)
 
 ```bash
 higgsfield generate create seedance_2_0 \
   --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
   --generate-audio false --wait \
-  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. Real hands slowly twist open an anodized metal grinder resting on a dark walnut counter, revealing evenly ground green herb inside the chamber. The knurled metal grip and sharp teeth catch the light. The ground material is textured and slightly uneven, real and organic, not uniform. Handheld micro-drift, almost still. Warm tungsten key light from camera left, cool blue-grey rim light from behind, near-black background falling into deep shadow. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock color grade. No text, no watermark, no logos, no faces."
+  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A tall handblown glass water pipe stands upright on a dark walnut counter, thick clear glass catching the light, the tube rising out of the top of frame. A short angled glass stem projects from the side of the pipe near its base, ending in a small cone-shaped chamber about the size of a thumb tip. Two fingers enter frame from the right holding a pinch of coarsely ground green herb, and slowly press it down into that small cone, packing it firmly. The fingers withdraw and the shot settles. Only a hand is visible, close and cropped, with five normal fingers. Warm tungsten key light from camera left, cool blue-grey rim light behind the glass, near-black background falling into deep shadow. Slow deliberate movement, handheld micro-drift. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock color grade. This is a smoking water pipe, not an ashtray, not a glass dish, not a cereal bowl. No text, no watermark, no logos, no face, no arms, no full body."
 ```
 
-## 03 — The Pack
+### If the hand comes out wrong
 
-```bash
-higgsfield generate create seedance_2_0 \
-  --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
-  --generate-audio false --wait \
-  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A thick handblown iridescent glass bowl piece rests on a dark walnut counter, dried green herb settling into it, fine golden dust drifting in the air around it. The glass shifts colour subtly as the light moves across it. Very slow, almost still, handheld micro-drift. Warm tungsten key light from camera left, cool blue-grey rim light from behind, near-black background falling into deep shadow. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock color grade. No text, no watermark, no logos, no faces."
-```
+Hands are where video models fail hardest, and this shot needs one. Two things
+that help before you burn credits on retries:
 
-## 04 — The Light *(spend your retries here)*
+- **Crop in tighter.** Add `only the fingertips and the top of the hand are in
+  frame` — fewer fingers visible, fewer chances to render a sixth.
+- **Slow the action down.** One pinch, one press, then stillness. Fast or
+  repeated hand motion is where the fingers start melting.
 
-```bash
-higgsfield generate create seedance_2_0 \
-  --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
-  --generate-audio false --wait \
-  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A flame meets dried herb packed in a thick glass bowl. It catches and glows deep orange, embers pulsing and brightening. Thick white smoke begins to rise and curl slowly through the frame, backlit so it glows against a near-black background. The ember is the main light source, warm firelight from below, cool blue rim light behind the smoke. Slow, heavy, hypnotic smoke movement. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. No text, no watermark, no logos, no faces."
-```
+If two attempts still look wrong, use the two-step route below — it's more
+reliable for anything involving hands, because you approve the hand *before*
+anything moves.
 
 ---
 
-## On refusals
+## The reliable route for this shot: still first, then animate
 
-A few of the still prompts got refused first time round and went through on a
-reword. The pattern: **describe the object, not the process.** "Dried green herb
-in a glass bowl" passes where "packed with ground cannabis" does not. The
-prompts above already use the phrasing that worked — if one still comes back
-empty, swap "herb" for "dried botanical" and it'll go.
+For a shot with hands in it, this is worth the extra 2 credits.
 
----
-
-## The higher-quality route: drive it from a still
-
-Seedance is strongest animating a frame you've already approved, and you
-**already have three matching stills** from the chapter film:
-
-```
-public/img/ch02-grind.jpg   →  02 The Grind
-public/img/ch03-pack.jpg    →  03 The Pack
-public/img/ch04-light.jpg   →  04 The Light
-```
-
-Feeding those in guarantees the ritual demo and the chapter film look like the
-same shoot, and you approve the composition before anything moves:
-
-```bash
-higgsfield generate create seedance_2_0 \
-  --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
-  --generate-audio false --wait \
-  --start-image ./public/img/ch04-light.jpg \
-  --prompt "The ember catches and pulses. Thick smoke rises slowly and curls through frame. Camera holds nearly still with faint handheld drift."
-```
-
-Keep the motion prompt that short — with a start image you're directing
-movement, not describing a scene.
-
-**One caveat:** those stills are 16:9 and you're asking for 4:3, so Seedance
-reframes and you lose some of the sides. If that bothers you, regenerate the
-start frame at 4:3 first (2 credits each):
+**Step 1 — generate the frame** (2 credits, retry until the hand is right):
 
 ```bash
 higgsfield generate create nano_banana_pro \
   --aspect-ratio 4:3 --resolution 2k --wait \
-  --prompt "<the full prompt from the matching section above>, still photograph, no motion"
+  --prompt "Extreme macro photograph, 85mm lens, shallow depth of field. A tall handblown glass water pipe stands upright on a dark walnut counter, thick clear glass, the tube rising out of the top of frame. A short angled glass stem projects from the side near the base, ending in a small cone-shaped chamber the size of a thumb tip. Two fingers hold a pinch of coarsely ground green herb just above that cone, about to press it in. Only a hand is visible, close and cropped, five normal fingers. Warm tungsten key light from camera left, cool blue-grey rim light behind the glass, near-black background falling into deep shadow. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. A smoking water pipe, not an ashtray, not a glass dish. Still photograph, no motion. No text, no watermark, no face."
+```
+
+**Step 2 — animate the approved frame** (short motion-only prompt):
+
+```bash
+higgsfield generate create seedance_2_0 \
+  --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
+  --generate-audio false --wait \
+  --start-image ./path-to-your-still.png \
+  --prompt "The fingers press the herb down into the cone, pack it, and withdraw from frame. The shot settles. Camera holds nearly still with faint handheld drift."
+```
+
+Keep the motion prompt that short — with a start image you're directing
+movement, not re-describing the scene.
+
+---
+
+## 04 — The Light
+
+Unchanged, and still the one worth your retries.
+
+```bash
+higgsfield generate create seedance_2_0 \
+  --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
+  --generate-audio false --wait \
+  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A flame meets dried herb packed in the small cone-shaped chamber of a glass water pipe. It catches and glows deep orange, embers pulsing and brightening. Thick white smoke begins to rise and curl slowly through the frame, backlit so it glows against a near-black background. The ember is the main light source, warm firelight from below, cool blue rim light behind the smoke. Slow, heavy, hypnotic smoke movement. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. No text, no watermark, no logos, no face."
 ```
 
 ---
 
-## After they generate
+## Two corrections to what I told you earlier
 
-Raw output is too heavy to autoplay. For each clip:
+**There is no negative-prompt field.** `higgsfield model get seedance_2_0`
+lists every parameter it takes, and `negative_prompt` isn't among them — same
+for `nano_banana_pro`. The "global negative prompt" block in
+`SEEDANCE-SHOTLIST.md` has nowhere to go except inside the prompt text itself,
+which is why every prompt here ends with its exclusions written out as a
+sentence. Ignore that block; use these prompts as written.
+
+**Muted video autoplays in Safari even with an audio track.** I said the
+opposite earlier — that was wrong. WebKit's rule is that a video autoplays if
+it is muted **or** has no audio track; either one is sufficient, and every
+video on this site sets `muted`. So audio was never going to break playback.
+It's still worth passing `--generate-audio false` — it makes the file smaller
+and removes any chance of a stray unmute — but it isn't a bug if you forget.
+
+---
+
+## After a clip generates
+
+You don't have ffmpeg installed, so I used macOS's built-in `avconvert` for the
+grind clip — it took it from 5.6MB to 2.6MB:
 
 ```bash
-ffmpeg -i input.mp4 -vf "scale=1440:-2,fps=24" -c:v libx264 -crf 24 \
-  -preset slow -movflags +faststart -an public/video/grind.mp4
+avconvert --source ~/Downloads/raw.mp4 --output ./converted.mp4 \
+  --preset Preset1280x720 --replace
 ```
 
-`-an` strips audio — see gotcha 1. `+faststart` puts the index at the front so
-playback begins before the whole file arrives.
-
-Then a poster frame each, so something is on screen before the video loads:
+On the grind clip this re-encoded at a lower bitrate and left the resolution
+alone (still 1112×834), which is fine — the stage renders about 700px wide.
+Then drop it in place and make a poster:
 
 ```bash
-ffmpeg -i public/video/grind.mp4 -vf "select=eq(n\,12)" -vframes 1 -q:v 3 \
-  public/video/grind.jpg
+cp ./converted.mp4 public/video/ritual-loop.mp4
+qlmanage -t -s 1400 -o /tmp public/video/ritual-loop.mp4
+sips -Z 1400 -s format jpeg -s formatOptions 80 \
+  /tmp/ritual-loop.mp4.png --out public/video/ritual-loop.jpg
 ```
 
-**Make step 03 loop cleanly.** It's the one that sits there while someone reads
-the copy, so a visible jump is obvious. Cross-dissolve the last second over the
-first:
-
-```bash
-ffmpeg -i in.mp4 -filter_complex \
-  "[0]split[a][b];[a]trim=0:4,setpts=PTS-STARTPTS[main];\
-   [b]trim=4:5,setpts=PTS-STARTPTS,format=yuva420p,fade=out:st=0:d=1:alpha=1[tail];\
-   [main][tail]overlay" -an public/video/ritual-loop.mp4
-```
-
-Smoke and glass are forgiving of this — you won't see the seam.
+If you do install ffmpeg later it gives finer control (`-crf`, frame-accurate
+posters, and a proper cross-dissolve so step 03 loops without a visible jump) —
+but none of that is blocking.
 
 ---
 
@@ -168,6 +146,5 @@ Smoke and glass are forgiving of this — you won't see the seam.
 npm run dev
 ```
 
-Open the homepage, scroll to **The Ritual**, and click through steps 02–04. Each
-should autoplay muted and loop. If a step still shows "footage pending", the
-filename doesn't match the table at the top.
+Homepage → **The Ritual** → click steps 02–04. Anything still showing "footage
+pending" has a filename mismatch with the table at the top.
