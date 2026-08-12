@@ -59,8 +59,12 @@ const STEPS: Step[] = [
     src: '/video/light.mp4',
     poster: '/video/light.jpg',
     body: 'Slow pull, clean water, good glass. Come get set up properly on Dorset Street.',
-    sound: true,
-    // Played at real speed — the bubbling only reads right at 1×.
+    // The installed clip has no audio track — it was generated with
+    // --generate-audio false. Showing an unmute button over a silent video is
+    // a small lie, so it stays off until a version with sound lands. The
+    // control itself is built and tested; flip this to true and it returns.
+    sound: false,
+    // Real speed regardless: a pull at 0.85x looks wrong.
     rate: 1,
   },
 ]

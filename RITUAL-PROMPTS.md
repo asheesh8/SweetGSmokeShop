@@ -6,7 +6,7 @@ Step 01 is the 3D nug scan and needs no video, so this is three clips.
 | --- | --- | --- |
 | 02 The Grind | `public/video/grind.mp4` | ✅ **done** — installed, 2.6MB, poster generated |
 | 03 The Pack | `public/video/ritual-loop.mp4` | ✅ **done** — v4-style take, funnel bowl + falling flakes, 960×720 / 2.7MB |
-| 04 The Light | `public/video/light.mp4` | ⬜ third person slow drag, 10s, **with sound** |
+| 04 The Light | `public/video/light.mp4` | ✅ **done** — third person slow drag, 10s, 960×720 / 5.3MB. ⚠️ no audio track (see below) |
 
 ---
 
@@ -134,10 +134,18 @@ movement, not re-describing the scene.
 
 ## 04 — The Light (third person, slow drag, 10s, with sound)
 
-**This is the one clip that keeps its audio.** Everything else on the site is
-silent wallpaper; a slow pull is the one moment where sound is the point. So
-this shot alone uses `--generate-audio true`, and the ritual player has an
-unmute button wired for it — see the next section.
+**This is the one clip that should keep its audio** — everything else on the
+site is silent wallpaper, and a slow pull is the moment where sound is the
+point. So it alone uses `--generate-audio true`.
+
+> ⚠️ **The installed clip is silent.** It came back with no audio track at all
+> (verified: zero audio bytes decoded, on both the encoded file and the raw
+> download), so the generating command almost certainly still had
+> `--generate-audio false` carried over from the pack clips. The footage is
+> right, so it's installed as-is and `sound` is set to `false` in
+> `RitualDemo.tsx` — an unmute button over a silent video is a small lie.
+> Re-run with `--generate-audio true`, drop the new file in, flip that one flag
+> back to `true`, and the control returns. It's already built and tested.
 
 ### What the POV attempt got wrong
 
