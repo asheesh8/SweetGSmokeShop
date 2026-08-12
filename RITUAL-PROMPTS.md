@@ -5,53 +5,62 @@ Step 01 is the 3D nug scan and needs no video, so this is three clips.
 | Step | File | Status |
 | --- | --- | --- |
 | 02 The Grind | `public/video/grind.mp4` | ✅ **done** — installed, 2.6MB, poster generated |
-| 03 The Pack | `public/video/ritual-loop.mp4` | ⬜ v2 prompt below |
+| 03 The Pack | `public/video/ritual-loop.mp4` | ⬜ v3 prompt below (v1 ashtray, v2 whole nug + no bowl) |
 | 04 The Light | `public/video/light.mp4` | ⬜ |
 
 ---
 
-## What went wrong with the Pack, and the fix
+## The Pack — where v2 landed, and v3
 
-The v1 prompt said *"a thick handblown iridescent glass bowl piece."* It
-generated **a glass ashtray.** Two reasons, both mine:
+**v1** made a glass ashtray. **v2** got most of the way there: correct beaker
+bong, correct walnut counter, correct lighting, and an anatomically sound hand
+with five fingers. Two things are still wrong, and they're both things the
+prompt never actually described.
 
-1. **"Bowl piece" is shop jargon the model doesn't know.** It read "glass bowl"
-   literally — a bowl-shaped glass dish. Ashtray, cereal bowl, candle holder;
-   all reasonable readings of the words I gave it.
-2. **Nothing in the prompt asked for a person or a bong.** I wrote that the
-   bowl "rests" on the counter, so nothing moved and no hands appeared.
+**Problem 1 — it's a whole nug, not ground herb.** v2 said "coarsely ground
+green herb," but "herb" and "flower" both pull the model toward the iconic
+cone-shaped bud, and nothing in the prompt described what ground material
+*looks* like. Adjectives lose to a strong visual prior; you have to describe the
+texture.
 
-The fix is to stop naming the object and **describe its geometry instead** —
-"a short angled glass stem projecting from the side of the pipe, ending in a
-small cone-shaped chamber about the size of a thumb tip." That's a shape the
-model can actually render. The v2 prompt below also names the failure modes
-explicitly (`not an ashtray, not a glass dish`), which is worth doing whenever
-a generation has already gone wrong in a specific way.
+**Problem 2 — there's no bowl piece.** That little glass tube on the side of
+the beaker is the **socket** (the female joint), which is moulded into the bong
+itself. A bowl piece is a *separate removable part* that plugs into it, and v2
+never said so — so the model rendered the socket, left it empty, and the bud
+went straight down into the bong.
+
+The fixes: describe ground herb by **texture and analogy** ("crumbly and
+shredded, like dried oregano"), and describe the bowl as **a separate object
+with a familiar shape** ("a tiny glass funnel, like a small wine glass with no
+base, plugged into the socket").
 
 ---
 
-## 03 — The Pack (v2)
+## 03 — The Pack (v3)
 
 ```bash
 higgsfield generate create seedance_2_0 \
   --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
   --generate-audio false --wait \
-  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A tall handblown glass water pipe stands upright on a dark walnut counter, thick clear glass catching the light, the tube rising out of the top of frame. A short angled glass stem projects from the side of the pipe near its base, ending in a small cone-shaped chamber about the size of a thumb tip. Two fingers enter frame from the right holding a pinch of coarsely ground green herb, and slowly press it down into that small cone, packing it firmly. The fingers withdraw and the shot settles. Only a hand is visible, close and cropped, with five normal fingers. Warm tungsten key light from camera left, cool blue-grey rim light behind the glass, near-black background falling into deep shadow. Slow deliberate movement, handheld micro-drift. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock color grade. This is a smoking water pipe, not an ashtray, not a glass dish, not a cereal bowl. No text, no watermark, no logos, no face, no arms, no full body."
+  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A clear glass beaker-base water pipe stands on a dark walnut counter, its tube rising out of the top of frame. Plugged into the angled socket on the side of the beaker is a separate small removable glass bowl: a tiny clear glass funnel with a wide flared rim and a short narrow stem, shaped like a small wine glass with no base, sitting in the socket at an angle. Two fingers enter from the right holding a loose pinch of finely ground plant material — crumbly, shredded and uneven, the texture of dried oregano or coarse loose-leaf green tea, made of many tiny separate fragments and flakes. The fingers crumble it so the fragments tumble down and fill the little glass funnel, a few flakes scattering onto the glass, then a fingertip gently presses the pile down and withdraws. Warm tungsten key light from camera left, cool blue-grey rim light behind the glass, near-black background falling into deep shadow. Slow, deliberate, handheld micro-drift. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock color grade. The material is loose crumbled fragments, absolutely not a single whole intact flower bud, not one solid cone-shaped nug. The herb goes into the small removable glass funnel bowl, not down the open tube. Only a hand, five normal fingers. No text, no watermark, no logos, no face, no arms."
 ```
 
-### If the hand comes out wrong
+### What changed and why
 
-Hands are where video models fail hardest, and this shot needs one. Two things
-that help before you burn credits on retries:
+| Fix | The words doing the work |
+| --- | --- |
+| Ground, not a bud | *crumbly, shredded and uneven · texture of dried oregano or coarse loose-leaf green tea · many tiny separate fragments and flakes* |
+| Reinforced by motion | *the fingers crumble it so the fragments tumble down · a few flakes scattering* — something solid can't scatter |
+| Stated as a negative | *absolutely not a single whole intact flower bud, not one solid cone-shaped nug* |
+| A real bowl piece | *a separate small removable glass bowl · a tiny clear glass funnel with a wide flared rim and a short narrow stem · shaped like a small wine glass with no base* |
+| Where it goes | *into the small removable glass funnel bowl, not down the open tube* |
 
-- **Crop in tighter.** Add `only the fingertips and the top of the hand are in
-  frame` — fewer fingers visible, fewer chances to render a sixth.
-- **Slow the action down.** One pinch, one press, then stillness. Fast or
-  repeated hand motion is where the fingers start melting.
-
-If two attempts still look wrong, use the two-step route below — it's more
-reliable for anything involving hands, because you approve the hand *before*
-anything moves.
+**If the bowl still doesn't appear**, the socket is winning because the model
+has seen far more bongs than bowl pieces. Two options: shoot it already packed
+(`the small glass funnel bowl is already seated in the socket and half full of
+crumbled herb; the fingers add a last pinch and press it down`), which is an
+easier frame to render, or use the still-first route below and retry the still
+until the bowl is there — at 2 credits a go that's the cheap way to fight it.
 
 ---
 
@@ -64,7 +73,7 @@ For a shot with hands in it, this is worth the extra 2 credits.
 ```bash
 higgsfield generate create nano_banana_pro \
   --aspect-ratio 4:3 --resolution 2k --wait \
-  --prompt "Extreme macro photograph, 85mm lens, shallow depth of field. A tall handblown glass water pipe stands upright on a dark walnut counter, thick clear glass, the tube rising out of the top of frame. A short angled glass stem projects from the side near the base, ending in a small cone-shaped chamber the size of a thumb tip. Two fingers hold a pinch of coarsely ground green herb just above that cone, about to press it in. Only a hand is visible, close and cropped, five normal fingers. Warm tungsten key light from camera left, cool blue-grey rim light behind the glass, near-black background falling into deep shadow. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. A smoking water pipe, not an ashtray, not a glass dish. Still photograph, no motion. No text, no watermark, no face."
+  --prompt "Extreme macro photograph, 85mm lens, shallow depth of field. A clear glass beaker-base water pipe stands on a dark walnut counter, its tube rising out of the top of frame. Plugged into the angled socket on the side of the beaker is a separate small removable glass bowl: a tiny clear glass funnel with a wide flared rim and a short narrow stem, shaped like a small wine glass with no base. That funnel is filled with finely ground plant material — crumbly, shredded, uneven, the texture of dried oregano or coarse loose-leaf green tea, many tiny separate fragments. Two fingers hover just above it holding another pinch of the same crumbled material. Only a hand, five normal fingers. Warm tungsten key light from camera left, cool blue-grey rim light behind the glass, near-black background falling into deep shadow. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. Loose crumbled fragments, not a whole intact flower bud. Still photograph, no motion. No text, no watermark, no face."
 ```
 
 **Step 2 — animate the approved frame** (short motion-only prompt):
