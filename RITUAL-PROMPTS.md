@@ -6,7 +6,7 @@ Step 01 is the 3D nug scan and needs no video, so this is three clips.
 | --- | --- | --- |
 | 02 The Grind | `public/video/grind.mp4` | ✅ **done** — installed, 2.6MB, poster generated |
 | 03 The Pack | `public/video/ritual-loop.mp4` | ✅ **done** — v4-style take, funnel bowl + falling flakes, 960×720 / 2.7MB |
-| 04 The Light | `public/video/light.mp4` | ⬜ POV lap shot, 10s, **with sound** |
+| 04 The Light | `public/video/light.mp4` | ⬜ third person slow drag, 10s, **with sound** |
 
 ---
 
@@ -132,49 +132,58 @@ movement, not re-describing the scene.
 
 ---
 
-## 04 — The Light (POV, 10s, with sound)
+## 04 — The Light (third person, slow drag, 10s, with sound)
 
 **This is the one clip that keeps its audio.** Everything else on the site is
-silent wallpaper; a bong pull is the one moment where sound is the point. So
-this shot alone is generated with `--generate-audio true`, and I've added an
-unmute button to the ritual player for it — see the note below.
+silent wallpaper; a slow pull is the one moment where sound is the point. So
+this shot alone uses `--generate-audio true`, and the ritual player has an
+unmute button wired for it — see the next section.
 
-**Two deliberate departures from the other clips:**
+### What the POV attempt got wrong
 
-- **It's a wider POV, not a macro.** Looking down at your own lap. That breaks
-  the "one camera everywhere" rule on purpose — it's the payoff shot, and the
-  change in framing is what makes it feel like the moment arrives. The grade
-  stays identical so it still belongs to the same roll.
-- **It plays at 1×, not 0.85×.** The other clips are slowed for texture. A pull
-  slowed down sounds and looks wrong, so the player runs this one at real speed.
+The lap POV rendered well but missed on three counts:
 
-**Cost: 90 credits** at 10s/1080p (45 at 720p). You have 935.
+1. **Nobody took a rip.** The lighter touched the bowl and smoke drifted off the
+   top, but the chamber never filled and there was no inhale. The prompt
+   described *lighting* it, not *smoking* it.
+2. **The fire was a bonfire.** A visible flame plume leapt off the bowl and the
+   herb glowed like a coal. "Catches and glows deep orange, embers pulsing and
+   brightening" is language that asks for drama, and it got drama.
+3. **POV is the wrong frame for it.** You can't see someone take a pull from
+   inside their own head. Third person is what shows the action.
+
+### The fix
+
+Restraint has to be stated as often as action, or the model escalates — every
+generative video model treats "fire" as an invitation. So the flame is described
+by its limits (*contained, modest, no plume, no leaping*), the smoke by its
+gentleness (*a thin veil, never billowing*), and the whole clip is labelled
+*restrained and subtle, not dramatic* at the end.
+
+Framing crops **above the mouth**: you see lips on the mouthpiece, which is what
+reads as taking a pull, but not a full face. That dodges the uncanny-face
+problem while keeping the moment.
 
 ```bash
 higgsfield generate create seedance_2_0 \
   --aspect-ratio 4:3 --duration 10 --resolution 1080p --mode std \
   --generate-audio true --wait \
-  --prompt "First-person point of view, looking down at my own lap while sitting on a couch. A clear glass beaker-base water pipe rests upright between my knees on dark blue jeans, held steady by one hand around its neck. The water inside is clear and colourless. The other hand brings a lighter to the small glass bowl on the side of the pipe. The flame touches the ground herb and it catches, glowing deep orange, embers pulsing. Thick white smoke immediately begins to fill the glass chamber, swirling and churning, building until the whole beaker is opaque white. Then the smoke is pulled downward and disappears as it is inhaled, the glass clearing from top to bottom, leaving only a faint wisp. The ember is the brightest thing in frame, warm firelight from below, pale silver rim light behind the smoke, dim warm room light, near-black background. Camera is the smoker's own eyes, slight natural head movement, no face visible, no mirror, chest and lap only. Audio: a deep steady bubbling gurgle of air pulling through water, growing stronger, then a long slow inhale, then silence. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock colour grade, warm overall. No blue tint, no coloured water. No text, no watermark, no logos, no face."
+  --prompt "Medium shot, 50mm lens, shallow depth of field, third person view. A person sits on a dark couch in a dim room, seen from the side at chest height. Framed from the waist up to just above the mouth, so only the lips and chin are visible and the rest of the face is cropped off above the top edge of frame. They hold a clear glass beaker water pipe steady in one hand, lips resting on the mouthpiece. The other hand brings a lighter to the small glass bowl on the side. The flame is small, steady and contained, just enough to make the ground herb glow a soft dull ember orange. No flame plume, no leaping fire, no torch, no bonfire, no bright flare. As they draw slowly, a thin pale veil of smoke gathers inside the glass and gradually fills the chamber, rising gently and evenly. The smoke never billows, never bursts, never fills violently. The draw is long, calm and unhurried. Then they lift their lips from the mouthpiece and the smoke clears smoothly downward out of the glass, leaving the chamber clear. Warm tungsten lamp light from camera left, dim warm room, near-black background falling into deep shadow. The water in the pipe is clear and colourless. Audio: a soft steady bubbling gurgle of water, a slow quiet inhale, then silence. Very slow, calm, minimal camera movement, faint handheld drift. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock colour grade. Restrained, quiet and subtle, not dramatic, not intense. No blue tint, no coloured water. No text, no watermark, no logos, no eyes, no full face."
 ```
-
-### The words doing the work
 
 | Intent | Phrasing |
 | --- | --- |
-| On the lap, POV | *first-person point of view, looking down at my own lap while sitting on a couch · rests upright between my knees on dark blue jeans · camera is the smoker's own eyes · chest and lap only* |
-| Smoke fills, then goes in | *fill the glass chamber, swirling and churning, building until the whole beaker is opaque white · then the smoke is pulled downward and disappears as it is inhaled, the glass clearing from top to bottom* |
-| The sound | *Audio: a deep steady bubbling gurgle of air pulling through water, growing stronger, then a long slow inhale, then silence* |
-| No face, no mirror | *no face visible, no mirror* — POV prompts often produce a reflection or swing round to a face |
+| Third person, no face | *third person view · seen from the side at chest height · framed from the waist up to just above the mouth · only the lips and chin are visible · no eyes, no full face* |
+| He actually takes a rip | *lips resting on the mouthpiece · as they draw slowly · then they lift their lips from the mouthpiece* |
+| Fire dialled down | *small, steady and contained · soft dull ember orange · no flame plume, no leaping fire, no torch, no bonfire, no bright flare* |
+| Smoke dialled down | *a thin pale veil · rising gently and evenly · never billows, never bursts, never fills violently* |
+| Slow drag | *long, calm and unhurried · very slow, minimal camera movement* |
+| Overall register | *restrained, quiet and subtle, not dramatic, not intense* |
 
-**On the audio:** Seedance takes its cue from the word `Audio:` in the prompt.
-Keep the description to the two or three sounds that matter — listing more
-tends to produce a muddy generic ambience instead of a clean gurgle.
-
-**If the POV fights you** and it keeps rendering a third-person shot of a person
-on a couch, drop `first-person point of view` and lead with the body copy
-instead: *"Camera mounted at eye level looking straight down at a lap. Knees and
-dark jeans fill the bottom of frame."* Describing what's in the frame beats
-naming the camera style.
+**If it's still too fiery**, cut the lighter out of the shot entirely: replace
+the flame sentence with *"the bowl is already lit and glowing faintly; the
+lighter is out of frame."* An unseen ignition is the surest way to stop the
+model performing one.
 
 ---
 
