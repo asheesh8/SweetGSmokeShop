@@ -5,7 +5,7 @@ Step 01 is the 3D nug scan and needs no video, so this is three clips.
 | Step | File | Status |
 | --- | --- | --- |
 | 02 The Grind | `public/video/grind.mp4` | ✅ **done** — installed, 2.6MB, poster generated |
-| 03 The Pack | `public/video/ritual-loop.mp4` | ⬜ v3 prompt below (v1 ashtray, v2 whole nug + no bowl) |
+| 03 The Pack | `public/video/ritual-loop.mp4` | ✅ **done** — trimmed to the flake-break moment, poster generated |
 | 04 The Light | `public/video/light.mp4` | ⬜ |
 
 ---
@@ -64,6 +64,47 @@ until the bowl is there — at 2 credits a go that's the cheap way to fight it.
 
 ---
 
+## 03 — The Pack (v4), if you re-roll it
+
+The v3 clip is installed and good. A later re-roll came back worse in three
+ways, so if you're chasing a better take, use v4 — it guards against all three.
+
+**1. The herb went in as a solid plug.** It held a cylindrical shape like a cork
+being pushed into a bottle. v3's "many tiny fragments" describes the *material*
+but not what it *does*, so the model rendered a cohesive puck. The fix is to
+describe separation as an event: fragments coming apart in mid-air.
+
+**2. The bowl was a straight tube again, not a funnel.** Same socket-vs-bowl
+problem as v2 — v3 won it, this roll lost it. Worth negating the wrong shape by
+name: *not a straight-walled tube.*
+
+**3. The water came out bright blue — and that one is my prompt's fault.** Every
+prompt here says *"cool blue-grey rim light."* With a beaker full of water in
+frame, "blue" stopped being a lighting note and became the colour of the liquid.
+It also dragged the whole grade cool, which fights the warm amber the rest of
+the footage is graded in. v4 says *pale silver* instead and rules out the tint
+explicitly.
+
+```bash
+higgsfield generate create seedance_2_0 \
+  --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
+  --generate-audio false --wait \
+  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A clear glass beaker-base water pipe stands on a dark walnut counter, its tube rising up and out of the top of the frame so the mouthpiece is not visible. The water inside is completely clear and colourless like plain tap water. Plugged into the angled socket on the side of the beaker is a separate small removable glass bowl, shaped like a tiny funnel: narrow at the bottom where it enters the socket, flaring outward and upward into a wide open cone, like a small wine glass with no base. It is a cone that widens, not a straight-walled tube. Two fingers enter from the right holding a loose pinch of finely ground plant material, crumbly and shredded like dried oregano. As the fingers rub together the pinch comes apart in mid-air: individual flakes and fragments separate and tumble down independently, scattering, filling the little cone and dusting the glass around it. The material never holds together as one solid piece. Then a fingertip lightly presses the loose pile and withdraws. Warm tungsten key light from camera left, pale silver rim light behind the glass, near-black background falling into deep shadow. Slow, deliberate, handheld micro-drift. Cinematic, heavy filmic grain, warm amber highlights and crushed blacks, muted earthy 1970s film stock colour grade, warm overall. No blue tint anywhere, no blue or coloured water, no cyan cast. Loose separated flakes, absolutely not a solid plug, puck, disc, cork or whole intact bud. Only a hand, five normal fingers. No text, no watermark, no logos, no face, no arms."
+```
+
+| Problem in the re-roll | The words fixing it |
+| --- | --- |
+| Solid plug of herb | *comes apart in mid-air · separate and tumble down independently · never holds together as one solid piece · not a solid plug, puck, disc, cork* |
+| Straight tube, no bowl | *narrow at the bottom… flaring outward and upward into a wide open cone · a cone that widens, not a straight-walled tube* |
+| Blue water and cool cast | *completely clear and colourless like plain tap water · pale silver rim light · warm overall · no blue tint anywhere, no blue or coloured water, no cyan cast* |
+| Mouthpiece in shot | *rising up and out of the top of the frame so the mouthpiece is not visible* |
+
+> **Lighting note that applies to every shot here:** naming a colour in the
+> lighting clause will tint objects, not just light. If a scene has water, glass
+> or smoke in it, say *pale silver* or *cool white* rather than *blue*.
+
+---
+
 ## The reliable route for this shot: still first, then animate
 
 For a shot with hands in it, this is worth the extra 2 credits.
@@ -99,7 +140,7 @@ Unchanged, and still the one worth your retries.
 higgsfield generate create seedance_2_0 \
   --aspect-ratio 4:3 --duration 5 --resolution 1080p --mode std \
   --generate-audio false --wait \
-  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A flame meets dried herb packed in the small cone-shaped chamber of a glass water pipe. It catches and glows deep orange, embers pulsing and brightening. Thick white smoke begins to rise and curl slowly through the frame, backlit so it glows against a near-black background. The ember is the main light source, warm firelight from below, cool blue rim light behind the smoke. Slow, heavy, hypnotic smoke movement. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. No text, no watermark, no logos, no face."
+  --prompt "Extreme macro shot, 85mm lens, shallow depth of field. A flame meets dried herb packed in the small cone-shaped chamber of a glass water pipe. It catches and glows deep orange, embers pulsing and brightening. Thick white smoke begins to rise and curl slowly through the frame, backlit so it glows against a near-black background. The ember is the main light source, warm firelight from below, pale silver rim light behind the smoke. Any water visible in the glass is clear and colourless, no blue tint. Slow, heavy, hypnotic smoke movement. Cinematic, heavy filmic grain, warm amber and crushed blacks, muted earthy 1970s film stock color grade. No text, no watermark, no logos, no face."
 ```
 
 ---
