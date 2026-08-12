@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Store } from '@/components/shop/Store'
+import { getInventory } from '@/lib/inventory'
 import { Cinematic } from '@/components/Cinematic'
 import { SHOP } from '@/lib/shop'
 
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
   alternates: { canonical: '/shop' },
 }
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const { items, categories } = await getInventory()
+
   return (
     <>
       <section className="relative overflow-hidden">
@@ -26,7 +29,7 @@ export default function ShopPage() {
       </section>
 
       <div className="border-t border-border">
-        <Store />
+        <Store items={items} categories={categories} />
       </div>
     </>
   )

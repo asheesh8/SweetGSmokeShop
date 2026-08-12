@@ -1,39 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
- * Product tile imagery.
+ * Product tile imagery, with a deliberate fallback.
  *
- * Sweet G's has no product photography yet, and a store grid with no pictures
- * is the thing that makes a shop look unfinished. So the fallback is a
- * deliberate editorial plate — palette-graded, with the index numeral and
- * category set like a catalogue plate — rather than a grey box or a stock
- * photo that isn't theirs.
- *
- * Drop a real photo at `public/products/<slug>.jpg` and it takes over with no
- * code change.
+ * `src` may be a Supabase Storage URL, a bundled `/products/<slug>.jpg`, or
+ * nothing at all. When it's missing or fails to load, this renders a
+ * palette-graded catalogue plate rather than a broken image or a grey box — a
+ * shop mid-way through photographing its stock should still look finished.
  */
 export function ProductImage({
-  slug,
+  src,
   name,
   category,
   index,
   className = '',
 }: {
-  slug: string
+  src: string | null
   name: string
   category: string
   index: number
   className?: string
 }) {
-  const [failed, setFailed] = useState(false)
+  const [failed, setFailed] = useState(!src)
 
-  if (!failed) {
+  // A new src (switching products in the quick view) deserves a fresh attempt.
+  useEffect(() => setFailed(!src), [src])
+
+  if (src && !failed) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- unknown-at-build-time
+      // eslint-disable-next-line @next/next/no-img-element -- src is a runtime value from Supabase Storage
       <img
-        src={`/products/${slug}.jpg`}
+        src={src}
         alt={name}
         loading="lazy"
         onError={() => setFailed(true)}

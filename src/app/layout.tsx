@@ -3,11 +3,6 @@ import { Anton, Shrikhand, Space_Grotesk, Space_Mono } from 'next/font/google'
 import './globals.css'
 import { SHOP, ADDRESS_ONE_LINE } from '@/lib/shop'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import { HoldListProvider } from '@/components/hold/HoldListProvider'
-import { ChapterProvider } from '@/components/film/ChapterContext'
-import { AgeGate } from '@/components/AgeGate'
-import { Nav } from '@/components/Nav'
-import { Footer } from '@/components/Footer'
 import { Toaster } from '@/components/ui/sonner'
 
 /**
@@ -72,53 +67,6 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-/**
- * LocalBusiness structured data. For a business whose entire job is getting
- * people through one physical door, this markup does more than any copy on the
- * page — it's what feeds the map pack.
- */
-function LocalBusinessJsonLd() {
-  const data = {
-    '@context': 'https://schema.org',
-    '@type': 'TobaccoShop',
-    '@id': `${SITE}/#shop`,
-    name: SHOP.name,
-    legalName: SHOP.legalName,
-    slogan: SHOP.tagline,
-    url: SITE,
-    telephone: SHOP.phone,
-    foundingDate: String(SHOP.established),
-    priceRange: '$$',
-    currenciesAccepted: 'USD',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: SHOP.address.street,
-      addressLocality: SHOP.address.locality,
-      addressRegion: SHOP.address.region,
-      postalCode: SHOP.address.postalCode,
-      addressCountry: SHOP.address.country,
-    },
-    geo: { '@type': 'GeoCoordinates', latitude: SHOP.geo.lat, longitude: SHOP.geo.lng },
-    openingHoursSpecification: SHOP.hours.map((h) => ({
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: h.schema.map((d) => `https://schema.org/${
-        { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday', Fr: 'Friday', Sa: 'Saturday', Su: 'Sunday' }[d]
-      }`),
-      opens: h.open,
-      closes: h.close,
-    })),
-    sameAs: [SHOP.social.instagram, SHOP.social.facebook, SHOP.bbb.profileUrl],
-    description: `Family-owned smoke shop at ${ADDRESS_ONE_LINE}. Tobacco products and accessories, glass, vaporizers and vape batteries, CBD, local and American-made art, and vintage and custom clothing.`,
-  }
-  return (
-    <script
-      type="application/ld+json"
-      // Static, author-controlled object — no user input reaches this string.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
-  )
-}
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     // suppressHydrationWarning is required by next-themes: it writes the theme
@@ -129,24 +77,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
       className={`${anton.variable} ${groovy.variable} ${body.variable} ${mono.variable}`}
     >
+      {/*
+        Deliberately thin. The storefront chrome — age gate, nav, footer — lives
+        in the (site) layout so /admin can render without any of it. An admin
+        being asked to confirm they're 21 before editing prices would be absurd.
+      */}
       <body className="grain">
-        <LocalBusinessJsonLd />
         <ThemeProvider>
-          <HoldListProvider>
-            <ChapterProvider>
-            <a
-              href="#main"
-              className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
-            >
-              Skip to content
-            </a>
-            <AgeGate />
-            <Nav />
-            <main id="main">{children}</main>
-            <Footer />
-            <Toaster />
-            </ChapterProvider>
-          </HoldListProvider>
+          {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

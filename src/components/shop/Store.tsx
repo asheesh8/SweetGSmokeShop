@@ -2,7 +2,8 @@
 
 import { useDeferredValue, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { CATEGORIES, PRODUCTS, type Product } from '@/lib/products'
+import type { Cat, Item } from '@/lib/catalog'
+import { formatPrice } from '@/lib/catalog'
 import { SHOP } from '@/lib/shop'
 import { useHoldList } from '@/components/hold/HoldListProvider'
 import { ProductImage } from './ProductImage'
@@ -18,19 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-type Sort = 'featured' | 'az' | 'za' | 'category'
-
-const BRANDS = Array.from(new Set(PRODUCTS.map((p) => p.brand).filter(Boolean))) as string[]
-
-/** Everything a search should be able to match, flattened once per product. */
-const HAYSTACK = new Map(
-  PRODUCTS.map((p) => [
-    p.slug,
-    [p.name, p.hook, p.body, p.brand ?? '', p.details.join(' '), p.category]
-      .join(' ')
-      .toLowerCase(),
-  ]),
-)
+type Sort = 'featured' | 'az' | 'za' | 'price-low' | 'price-high'
 
 function Facet({
   label,
@@ -65,18 +54,20 @@ function Facet({
  * The whole shop, on one page.
  *
  * Replaces a category-page → product-page drill-down, which meant two full
- * navigations before you saw a single thing you could act on. Filtering,
- * searching and holding all happen in place; the quick view is a dialog, not a
- * route. The per-product routes still exist for search engines and for anyone
- * who lands on a deep link, but nothing on-site makes you walk through them.
+ * navigations before you saw anything you could act on. Filtering, searching
+ * and holding all happen in place; the quick view is a dialog, not a route.
+ *
+ * Data comes in as props from a Server Component so this stays a pure view —
+ * it works identically against Supabase and against the static seed.
  */
-export function Store() {
+export function Store({ items, categories }: { items: Item[]; categories: Cat[] }) {
   const [query, setQuery] = useState('')
   const [cats, setCats] = useState<string[]>([])
   const [brands, setBrands] = useState<string[]>([])
   const [rotatingOnly, setRotatingOnly] = useState(false)
+  const [inStockOnly, setInStockOnly] = useState(false)
   const [sort, setSort] = useState<Sort>('featured')
-  const [preview, setPreview] = useState<Product | null>(null)
+  const [preview, setPreview] = useState<Item | null>(null)
   const [showFilters, setShowFilters] = useState(false)
 
   // Keeps typing responsive — the grid re-filters at its own pace.
@@ -84,121 +75,160 @@ export function Store() {
 
   const { add, has, setOpen } = useHoldList()
 
+  const brandList = useMemo(
+    () => Array.from(new Set(items.map((i) => i.brand).filter(Boolean))) as string[],
+    [items],
+  )
+
+  /** Everything a search should match, flattened once per item. */
+  const haystack = useMemo(() => {
+    const m = new Map<string, string>()
+    for (const i of items) {
+      m.set(
+        i.slug,
+        [i.name, i.hook, i.body, i.brand ?? '', i.details.join(' '), i.categorySlug,
+         i.variants.map((v) => v.name).join(' ')]
+          .join(' ')
+          .toLowerCase(),
+      )
+    }
+    return m
+  }, [items])
+
   const toggle = (list: string[], set: (v: string[]) => void, value: string) =>
     set(list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
 
+  const matches = (i: Item, terms: string[]) => {
+    if (cats.length && !cats.includes(i.categorySlug)) return false
+    if (brands.length && (!i.brand || !brands.includes(i.brand))) return false
+    if (rotatingOnly && !i.rotates) return false
+    if (inStockOnly && !i.inStock) return false
+    if (!terms.length) return true
+    const hay = haystack.get(i.slug) ?? ''
+    return terms.every((t) => hay.includes(t))
+  }
+
   const results = useMemo(() => {
     const terms = q.split(/\s+/).filter(Boolean)
+    const out = items.filter((i) => matches(i, terms))
 
-    const out = PRODUCTS.filter((p) => {
-      if (cats.length && !cats.includes(p.category)) return false
-      if (brands.length && (!p.brand || !brands.includes(p.brand))) return false
-      if (rotatingOnly && !p.rotates) return false
-      if (!terms.length) return true
-      const hay = HAYSTACK.get(p.slug) ?? ''
-      // Every term must appear somewhere — narrows as you type, which is what
-      // people expect from a shop search.
-      return terms.every((t) => hay.includes(t))
-    })
+    const byName = (a: Item, b: Item) => a.name.localeCompare(b.name)
+    // Null prices sort last in both directions — "ask in store" isn't $0.
+    const byPrice = (a: Item, b: Item, dir: 1 | -1) => {
+      if (a.priceCents == null && b.priceCents == null) return byName(a, b)
+      if (a.priceCents == null) return 1
+      if (b.priceCents == null) return -1
+      return (a.priceCents - b.priceCents) * dir
+    }
 
-    const byName = (a: Product, b: Product) => a.name.localeCompare(b.name)
     if (sort === 'az') return [...out].sort(byName)
     if (sort === 'za') return [...out].sort((a, b) => byName(b, a))
-    if (sort === 'category')
-      return [...out].sort((a, b) => a.category.localeCompare(b.category) || byName(a, b))
-    return out
-  }, [q, cats, brands, rotatingOnly, sort])
+    if (sort === 'price-low') return [...out].sort((a, b) => byPrice(a, b, 1))
+    if (sort === 'price-high') return [...out].sort((a, b) => byPrice(a, b, -1))
+    return [...out].sort((a, b) => Number(b.featured) - Number(a.featured) || byName(a, b))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, cats, brands, rotatingOnly, inStockOnly, sort, items, haystack])
 
-  /** Counts reflect the other active filters, so no facet leads to zero results. */
+  /** Counts reflect the *other* active filters, so no facet leads to zero. */
   const catCounts = useMemo(() => {
     const m = new Map<string, number>()
-    for (const p of PRODUCTS) {
-      if (brands.length && (!p.brand || !brands.includes(p.brand))) continue
-      if (rotatingOnly && !p.rotates) continue
-      if (q && !(HAYSTACK.get(p.slug) ?? '').includes(q)) continue
-      m.set(p.category, (m.get(p.category) ?? 0) + 1)
+    const terms = q.split(/\s+/).filter(Boolean)
+    for (const i of items) {
+      if (brands.length && (!i.brand || !brands.includes(i.brand))) continue
+      if (rotatingOnly && !i.rotates) continue
+      if (inStockOnly && !i.inStock) continue
+      if (terms.length && !terms.every((t) => (haystack.get(i.slug) ?? '').includes(t))) continue
+      m.set(i.categorySlug, (m.get(i.categorySlug) ?? 0) + 1)
     }
     return m
-  }, [brands, rotatingOnly, q])
+  }, [brands, rotatingOnly, inStockOnly, q, items, haystack])
 
-  const filtersOn = cats.length > 0 || brands.length > 0 || rotatingOnly || q.length > 0
+  const activeFacetCount = cats.length + brands.length + (rotatingOnly ? 1 : 0) + (inStockOnly ? 1 : 0)
+  const filtersOn = activeFacetCount > 0 || q.length > 0
+
   const clearAll = () => {
     setCats([])
     setBrands([])
     setRotatingOnly(false)
+    setInStockOnly(false)
     setQuery('')
   }
 
-  const hold = (p: Product) => {
-    add({ slug: p.slug, name: p.name, category: p.category })
+  const hold = (p: Item) => {
+    add({ slug: p.slug, name: p.name, category: p.categorySlug })
     toast.success(`${p.name} added to your hold list`, {
       description: 'We’ll set it aside when you send the list.',
       action: { label: 'View list', onClick: () => setOpen(true) },
     })
   }
 
-  const activeFacetCount = cats.length + brands.length + (rotatingOnly ? 1 : 0)
-
   const facets = (
     <>
       <div>
-            <p className="eyebrow">Category</p>
-            <div className="mt-2 space-y-0.5">
-              {CATEGORIES.map((c) => (
-                <Facet
-                  key={c.slug}
-                  label={c.name}
-                  count={catCounts.get(c.slug) ?? 0}
-                  active={cats.includes(c.slug)}
-                  onClick={() => toggle(cats, setCats, c.slug)}
-                />
-              ))}
-            </div>
-          </div>
+        <p className="eyebrow">Category</p>
+        <div className="mt-2 space-y-0.5">
+          {categories.map((c) => (
+            <Facet
+              key={c.slug}
+              label={c.name}
+              count={catCounts.get(c.slug) ?? 0}
+              active={cats.includes(c.slug)}
+              onClick={() => toggle(cats, setCats, c.slug)}
+            />
+          ))}
+        </div>
+      </div>
 
-          <div>
-            <p className="eyebrow">Brand</p>
-            <div className="mt-2 space-y-0.5">
-              {BRANDS.map((b) => (
-                <Facet
-                  key={b}
-                  label={b}
-                  active={brands.includes(b)}
-                  onClick={() => toggle(brands, setBrands, b)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="eyebrow">Availability</p>
-            <div className="mt-2">
+      {brandList.length > 0 && (
+        <div>
+          <p className="eyebrow">Brand</p>
+          <div className="mt-2 space-y-0.5">
+            {brandList.map((b) => (
               <Facet
-                label="Stock rotates weekly"
-                active={rotatingOnly}
-                onClick={() => setRotatingOnly((v) => !v)}
+                key={b}
+                label={b}
+                active={brands.includes(b)}
+                onClick={() => toggle(brands, setBrands, b)}
               />
-            </div>
+            ))}
           </div>
+        </div>
+      )}
 
-          {filtersOn && (
-            <Button variant="ghost" size="sm" onClick={clearAll} className="w-full">
-              Clear all filters
-            </Button>
-          )}
+      <div>
+        <p className="eyebrow">Availability</p>
+        <div className="mt-2 space-y-0.5">
+          <Facet
+            label="In stock only"
+            active={inStockOnly}
+            onClick={() => setInStockOnly((v) => !v)}
+          />
+          <Facet
+            label="Stock rotates weekly"
+            active={rotatingOnly}
+            onClick={() => setRotatingOnly((v) => !v)}
+          />
+        </div>
+      </div>
 
-          <div className="rounded-[var(--radius-sm)] border border-border p-4">
-            <p className="eyebrow">Can&rsquo;t find it?</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              The cases change weekly. Call and we&rsquo;ll tell you what&rsquo;s in today.
-            </p>
-            <a
-              href={SHOP.phoneHref}
-              className="mt-3 inline-block font-mono text-[11px] uppercase tracking-[0.14em] text-primary hover:underline"
-            >
-              {SHOP.phone}
-            </a>
-          </div>
+      {filtersOn && (
+        <Button variant="ghost" size="sm" onClick={clearAll} className="w-full">
+          Clear all filters
+        </Button>
+      )}
+
+      <div className="rounded-[var(--radius-sm)] border border-border p-4">
+        <p className="eyebrow">Can&rsquo;t find it?</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The cases change weekly. Call and we&rsquo;ll tell you what&rsquo;s in today.
+        </p>
+        <a
+          href={SHOP.phoneHref}
+          className="mt-3 inline-block font-mono text-[11px] uppercase tracking-[0.14em] text-primary hover:underline"
+        >
+          {SHOP.phone}
+        </a>
+      </div>
     </>
   )
 
@@ -216,7 +246,7 @@ export function Store() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Grinders, CBD, Backwoods…"
+              placeholder="Grinders, CBD, Blue Razz…"
               className="mt-2"
             />
           </div>
@@ -269,18 +299,18 @@ export function Store() {
                 <SelectItem value="featured">Featured</SelectItem>
                 <SelectItem value="az">Name A–Z</SelectItem>
                 <SelectItem value="za">Name Z–A</SelectItem>
-                <SelectItem value="category">Category</SelectItem>
+                <SelectItem value="price-low">Price: low to high</SelectItem>
+                <SelectItem value="price-high">Price: high to low</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        {/* Active filter pills — always show what's narrowing the results. */}
-        {(cats.length > 0 || brands.length > 0 || rotatingOnly) && (
+        {activeFacetCount > 0 && (
           <div className="flex flex-wrap gap-2 pt-4">
             {cats.map((c) => (
               <Badge key={c} variant="secondary" className="gap-1.5">
-                {CATEGORIES.find((x) => x.slug === c)?.name}
+                {categories.find((x) => x.slug === c)?.name ?? c}
                 <button onClick={() => toggle(cats, setCats, c)} aria-label={`Remove ${c} filter`}>
                   ×
                 </button>
@@ -294,10 +324,18 @@ export function Store() {
                 </button>
               </Badge>
             ))}
+            {inStockOnly && (
+              <Badge variant="secondary" className="gap-1.5">
+                In stock
+                <button onClick={() => setInStockOnly(false)} aria-label="Remove in-stock filter">
+                  ×
+                </button>
+              </Badge>
+            )}
             {rotatingOnly && (
               <Badge variant="secondary" className="gap-1.5">
                 Stock rotates
-                <button onClick={() => setRotatingOnly(false)} aria-label="Remove availability filter">
+                <button onClick={() => setRotatingOnly(false)} aria-label="Remove rotates filter">
                   ×
                 </button>
               </Badge>
@@ -320,9 +358,8 @@ export function Store() {
           <ul className="grid grid-cols-2 gap-x-5 gap-y-9 pt-8 lg:grid-cols-3">
             {results.map((p, i) => {
               const held = has(p.slug)
+              const inStockFlavours = p.variants.filter((v) => v.inStock).length
               return (
-                // Column layout + flex-1 on the text block so the hold button
-                // sits on a common baseline no matter how the title wraps.
                 <li key={p.slug} className="group flex flex-col">
                   <button
                     onClick={() => setPreview(p)}
@@ -331,23 +368,41 @@ export function Store() {
                   >
                     <div className="relative aspect-square overflow-hidden rounded-[var(--radius-md)] border border-border bg-card">
                       <ProductImage
-                        slug={p.slug}
+                        src={p.imageUrl}
                         name={p.name}
-                        category={CATEGORIES.find((c) => c.slug === p.category)?.name ?? p.category}
+                        category={categories.find((c) => c.slug === p.categorySlug)?.name ?? p.categorySlug}
                         index={i}
-                        className="transition-transform duration-500 group-hover:scale-[1.04]"
+                        className={`transition-transform duration-500 group-hover:scale-[1.04] ${
+                          p.inStock ? '' : 'opacity-50 grayscale'
+                        }`}
                       />
-                      {p.rotates && (
-                        <Badge className="absolute left-3 top-3" variant="secondary">
-                          Rotates
+                      {!p.inStock ? (
+                        <Badge className="absolute left-3 top-3" variant="outline">
+                          Out of stock
                         </Badge>
+                      ) : (
+                        p.rotates && (
+                          <Badge className="absolute left-3 top-3" variant="secondary">
+                            Rotates
+                          </Badge>
+                        )
                       )}
                     </div>
 
                     <div className="mt-3 flex-1">
                       {p.brand && <p className="eyebrow">{p.brand}</p>}
                       <h3 className="display mt-1 text-lg leading-tight">{p.name}</h3>
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.hook}</p>
+                      <p className="mt-1 font-mono text-[12px] text-primary">
+                        {formatPrice(p.priceCents)}
+                      </p>
+                      {inStockFlavours > 0 && (
+                        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+                          {inStockFlavours} flavours in
+                        </p>
+                      )}
+                      {p.hook && (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.hook}</p>
+                      )}
                     </div>
                   </button>
 
@@ -355,9 +410,10 @@ export function Store() {
                     variant={held ? 'secondary' : 'outline'}
                     size="sm"
                     className="mt-3 w-full"
+                    disabled={!p.inStock}
                     onClick={() => (held ? setOpen(true) : hold(p))}
                   >
-                    {held ? 'On your list ✓' : 'Hold for me'}
+                    {!p.inStock ? 'Out of stock' : held ? 'On your list ✓' : 'Hold for me'}
                   </Button>
                 </li>
               )
@@ -368,9 +424,10 @@ export function Store() {
 
       <QuickView
         product={preview}
+        categories={categories}
         onClose={() => setPreview(null)}
-        onHold={(p) => hold(p)}
-        isHeld={(slug) => has(slug)}
+        onHold={hold}
+        isHeld={has}
       />
     </div>
   )

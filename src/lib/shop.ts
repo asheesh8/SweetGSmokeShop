@@ -16,6 +16,9 @@ export const SHOP = {
 
   address: {
     street: '150 Dorset St',
+    /** Their Facebook listing carries the unit; BBB omits it. Keep both — the
+        unit helps anyone actually trying to find the door. */
+    unit: 'Unit 332',
     locality: 'South Burlington',
     region: 'VT',
     regionLong: 'Vermont',
@@ -28,6 +31,7 @@ export const SHOP = {
 
   phone: '(802) 497-0193',
   phoneHref: 'tel:+18024970193',
+  email: 'sweetgsmokeshop@gmail.com',
 
   established: 2018,
   bbb: {

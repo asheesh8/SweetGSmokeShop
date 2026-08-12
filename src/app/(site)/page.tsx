@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Film } from '@/components/film/Film'
 import { RitualDemo } from '@/components/ritual/RitualDemo'
 import { Store } from '@/components/shop/Store'
-import { PRODUCTS } from '@/lib/products'
+import { getInventory } from '@/lib/inventory'
 import { Button } from '@/components/ui/button'
 import { SHOP, DIRECTIONS_URL, ADDRESS_ONE_LINE, yearsOpen } from '@/lib/shop'
 
@@ -13,7 +13,9 @@ const MARKS = [
   { k: '7', v: 'Days a week, open till 8 most nights' },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { items, categories } = await getInventory()
+
   return (
     <>
       <Film />
@@ -30,7 +32,7 @@ export default function HomePage() {
               <div>
                 <p className="eyebrow eyebrow-rule">The whole shop</p>
                 <h2 className="display mt-5 text-[clamp(2rem,4.6vw,3.2rem)]">
-                  All {PRODUCTS.length} things, right here
+                  All {items.length} things, right here
                 </h2>
               </div>
               <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -39,7 +41,7 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <Store />
+          <Store items={items} categories={categories} />
         </section>
 
         <RitualDemo />
