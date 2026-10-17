@@ -10,6 +10,17 @@ npm run dev
 
 ---
 
+**Live:** https://sweet-g-smoke-shop.vercel.app · **Stack:** Next.js (App Router) + TypeScript + Tailwind CSS, Supabase for inventory and `/admin`, Resend for hold requests (`src/app/api/reserve`). Hosted on Vercel; pushes to `main` deploy to production.
+
+### Environment variables
+
+Names only — see `.env.example`.
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase project (publishable; Row Level Security protects the data) |
+| `RESEND_API_KEY`, `RESEND_FROM`, `SHOP_INBOX` | Delivering hold requests; without all three `/api/reserve` returns 503 |
+
 ## What this is
 
 A chapter film over real macro photography, with the shop's full inventory
